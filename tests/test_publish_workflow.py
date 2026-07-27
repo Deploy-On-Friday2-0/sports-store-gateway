@@ -36,3 +36,11 @@ def test_no_latest_tag_used():
 
     # Ensure ':latest' tag is not declared or referenced
     assert ":latest" not in content, "The usage of ':latest' image tag is strictly prohibited"
+
+def test_no_deployment_commands_used():
+    with open(WORKFLOW_PATH, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    # Ensure cluster isolation (no kubectl or helm)
+    assert "kubectl" not in content, "Workflow must maintain isolation and not use kubectl"
+    assert "helm" not in content, "Workflow must maintain isolation and not use helm"
