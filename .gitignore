@@ -3,6 +3,7 @@
 !.env.example
 
 *.log
+node_modules/
 .DS_Store
 .idea/
 .vscode/
