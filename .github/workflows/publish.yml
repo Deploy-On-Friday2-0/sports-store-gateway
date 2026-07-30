@@ -9,6 +9,10 @@ permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: production-image-writeback
+  cancel-in-progress: false
+
 jobs:
   build-and-push:
     name: Build and Push to ECR

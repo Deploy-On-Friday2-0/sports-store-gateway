@@ -78,7 +78,14 @@ def _assert_writeback_contract(content):
 
 def test_gitops_image_tag_writeback_contract():
     with open(WORKFLOW_PATH, "r", encoding="utf-8") as f:
-        _assert_writeback_contract(f.read())
+        content = f.read()
+
+    _assert_writeback_contract(content)
+    assert re.search(
+        r"concurrency:\s*\n\s*group:\s*production-image-writeback\s*\n"
+        r"\s*cancel-in-progress:\s*false",
+        content,
+    )
 
 
 @pytest.mark.parametrize(
