@@ -102,7 +102,7 @@ jobs:
           AI_REVIEW_WORKFLOW_RUN_ID: ${{ inputs.workflow_run_id }}
           AI_REVIEW_REQUIRED_JOBS_JSON: ${{ inputs.required_ci_jobs_json }}
           AI_REVIEW_CONFIG_JSON: ${{ inputs.reviewer_config_json }}
-        run: python -m review_runner.github_review
+        run: python -m pip install httpx && python -m review_runner.github_review
 
       - name: Report safe bootstrap failure
         id: bootstrap
