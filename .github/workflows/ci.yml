@@ -43,7 +43,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install reviewer test dependencies
-        run: python -m pip install httpx pytest pytest-asyncio
+        run: python -m pip install httpx pydantic pytest pytest-asyncio
 
       - name: Run tests
         run: python -m pytest -q
