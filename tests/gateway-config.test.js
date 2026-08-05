@@ -8,13 +8,13 @@ const nginxConfig = fs.readFileSync(path.join(root, "nginx.conf"), "utf8");
 const proxyParams = fs.readFileSync(path.join(root, "proxy_params.conf"), "utf8");
 
 const routes = [
-  ["/", "frontend:80"],
-  ["/api/auth/", "auth:8001"],
-  ["/api/products", "catalog:8002"],
-  ["/api/internal/", "catalog:8002"],
-  ["/api/cart", "cart:8003"],
-  ["/api/orders", "order:8004"],
-  ["/api/payments", "payment:8005"],
+  ["/", "https://d1rygqqor3hbbp.cloudfront.net"],
+  ["/api/auth/", "http://auth:8001"],
+  ["/api/products", "http://catalog:8002"],
+  ["/api/internal/", "http://catalog:8002"],
+  ["/api/cart", "http://cart:8003"],
+  ["/api/orders", "http://order:8004"],
+  ["/api/payments", "http://payment:8005"],
 ];
 
 function locationBlock(route) {
@@ -30,9 +30,21 @@ function locationBlock(route) {
 test("routes requests to the expected services", () => {
   for (const [route, upstream] of routes) {
     const block = locationBlock(route);
-    assert.match(block, new RegExp(`proxy_pass\\s+http://${upstream};`));
+    assert.match(block, new RegExp(`proxy_pass\\s+${upstream};`));
     assert.match(block, /include\s+\/etc\/nginx\/proxy_params\.conf;/);
   }
+});
+
+test("forwards the out-of-cluster frontend Host header to CloudFront", () => {
+  const block = locationBlock("/");
+  assert.match(
+    block,
+    /proxy_set_header\s+Host\s+d1rygqqor3hbbp\.cloudfront\.net;/,
+  );
+});
+
+test("serves a static /health response for probes", () => {
+  assert.match(nginxConfig, /location\s+=\s+\/health\s*\{\s*return\s+200;/);
 });
 
 test("forwards the original request identity and protocol", () => {
