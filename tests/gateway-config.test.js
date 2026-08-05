@@ -8,13 +8,13 @@ const nginxConfig = fs.readFileSync(path.join(root, "nginx.conf"), "utf8");
 const proxyParams = fs.readFileSync(path.join(root, "proxy_params.conf"), "utf8");
 
 const routes = [
-  ["/", "https://d1rygqqor3hbbp.cloudfront.net"],
-  ["/api/auth/", "http://auth:8001"],
-  ["/api/products", "http://catalog:8002"],
-  ["/api/internal/", "http://catalog:8002"],
-  ["/api/cart", "http://cart:8003"],
-  ["/api/orders", "http://order:8004"],
-  ["/api/payments", "http://payment:8005"],
+  ["/", "https://d1rygqqor3hbbp.cloudfront.net", false],
+  ["/api/auth/", "http://auth:8001", true],
+  ["/api/products", "http://catalog:8002", true],
+  ["/api/internal/", "http://catalog:8002", true],
+  ["/api/cart", "http://cart:8003", true],
+  ["/api/orders", "http://order:8004", true],
+  ["/api/payments", "http://payment:8005", true],
 ];
 
 function locationBlock(route) {
@@ -28,10 +28,18 @@ function locationBlock(route) {
 }
 
 test("routes requests to the expected services", () => {
-  for (const [route, upstream] of routes) {
+  for (const [route, upstream, usesSharedProxyParams] of routes) {
     const block = locationBlock(route);
     assert.match(block, new RegExp(`proxy_pass\\s+${upstream};`));
-    assert.match(block, /include\s+\/etc\/nginx\/proxy_params\.conf;/);
+    if (usesSharedProxyParams) {
+      assert.match(block, /include\s+\/etc\/nginx\/proxy_params\.conf;/);
+    } else {
+      assert.doesNotMatch(
+        block,
+        /include\s+\/etc\/nginx\/proxy_params\.conf;/,
+        `${route} must inline its proxy headers to avoid a duplicate Host`,
+      );
+    }
   }
 });
 
